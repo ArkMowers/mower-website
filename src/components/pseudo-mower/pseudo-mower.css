@@ -1,0 +1,1371 @@
+/* ==========================================================================
+   Pseudo Mower - Interactive Web Desktop Experience
+   Recreates authentic Arknights Mower client UI directly in the browser
+   ========================================================================== */
+
+.pseudo-mower-window {
+  position: relative;
+  width: min(calc(100vw - 32px), 1220px);
+  height: clamp(560px, 66vh, 730px);
+  margin-inline: auto;
+  border-radius: 12px;
+  background: #14171a;
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  font-family: var(--font-sans);
+  /* Authentic macOS High-End Screenshot Drop Shadow */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.22),
+    0 8px 16px -2px rgba(0, 0, 0, 0.36),
+    0 24px 48px -6px rgba(0, 0, 0, 0.55),
+    0 55px 110px -12px rgba(0, 0, 0, 0.76);
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms ease;
+  z-index: 10;
+}
+
+.pseudo-mower-window.window-maximized {
+  position: fixed;
+  inset: 16px;
+  width: calc(100vw - 32px);
+  height: calc(100vh - 32px);
+  z-index: 999;
+  border-radius: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   1. Title Bar
+   -------------------------------------------------------------------------- */
+.mower-titlebar {
+  height: 34px;
+  background: #161a1d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+
+.titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.titlebar-logo {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.titlebar-title {
+  font-size: 11.5px;
+  font-weight: 550;
+  color: rgba(244, 249, 245, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-version {
+  color: #34d399;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}
+
+.titlebar-meta {
+  color: rgba(244, 249, 245, 0.45);
+  font-size: 11px;
+}
+
+.titlebar-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1.5px 8px;
+  border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.status-running {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.status-paused {
+  background: rgba(251, 113, 133, 0.15);
+  color: #fb7185;
+  border: 1px solid rgba(251, 113, 133, 0.3);
+}
+
+.status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.titlebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.titlebar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(244, 249, 245, 0.6);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.btn-close:hover {
+  background: #e06c75;
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   2. Main Body (Sidebar + Workspace)
+   -------------------------------------------------------------------------- */
+.mower-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: #121517;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.mower-sidebar {
+  width: 195px;
+  flex-shrink: 0;
+  background: #15191c;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 8px;
+  overflow-y: auto;
+}
+
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6.5px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(244, 249, 245, 0.7);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 180ms ease;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(244, 249, 245, 0.95);
+}
+
+.sidebar-nav-item.is-active {
+  background: #1c3833;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.item-with-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.nav-caret {
+  opacity: 0.5;
+}
+
+.ai-item-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ai-sparkle-icon {
+  color: #facc15;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 8px 4px;
+}
+
+.secondary-group .sidebar-nav-item {
+  font-size: 12px;
+  color: rgba(244, 249, 245, 0.55);
+}
+
+/* --------------------------------------------------------------------------
+   3. Workspace (Logs View & Subviews)
+   -------------------------------------------------------------------------- */
+.mower-workspace {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background: #121517;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-logs-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lumen Background Artwork on the right */
+.workspace-lumen-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 46px;
+  width: 48%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+  opacity: 0.72;
+  mix-blend-mode: screen;
+}
+
+.lumen-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right top;
+  filter: contrast(1.05) saturate(1.1);
+}
+
+/* Left Column of Logs View */
+.logs-left-column {
+  flex: 1;
+  min-height: 0;
+  width: min(100%, 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 6px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* 1. Emulator Preview Panel */
+.emulator-preview-panel {
+  background: #0f1214;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 200ms ease;
+}
+
+.emulator-preview-panel:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.emulator-panel-header {
+  height: 22px;
+  background: #181d21;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+}
+
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.live-pill {
+  background: #ef4444;
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.panel-tag {
+  color: rgba(244, 249, 245, 0.6);
+  font-family: var(--font-mono, monospace);
+}
+
+.ocr-engine-tag {
+  color: #34d399;
+  font-size: 10px;
+}
+
+.emulator-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 180px;
+  background: #000;
+  overflow: hidden;
+}
+
+.emulator-screen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emulator-tap-ripple {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.25);
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: tap-expand 500ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes tap-expand {
+  to {
+    transform: translate(-50%, -50%) scale(2.2);
+    opacity: 0;
+  }
+}
+
+.emulator-hud-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 18, 20, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 3px 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  color: rgba(244, 249, 245, 0.85);
+}
+
+/* 2. Schedule Panel */
+.schedule-panel {
+  background: rgba(15, 18, 20, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.schedule-panel-header {
+  display: grid;
+  grid-template-columns: 75px 1fr 65px;
+  padding: 0 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  color: rgba(244, 249, 245, 0.45);
+  font-weight: 600;
+}
+
+.schedule-rows-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 75px 1fr 65px;
+  align-items: center;
+  padding: 3.5px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 150ms ease;
+}
+
+.schedule-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.row-highlight {
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.2);
+}
+
+.row-time {
+  font-family: var(--font-mono, monospace);
+  color: #38bdf8;
+  font-size: 10.5px;
+}
+
+.row-task-desc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-label {
+  color: #94a3b8;
+  font-size: 10.5px;
+  font-family: var(--font-mono, monospace);
+}
+
+.ops-chain {
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.row-tag {
+  font-size: 10px;
+  text-align: right;
+  color: rgba(244, 249, 245, 0.5);
+}
+
+.tag-accent {
+  color: #facc15;
+  font-weight: 600;
+}
+
+.subtables-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 10px;
+  flex-wrap: wrap;
+}
+
+.subtables-lead {
+  color: rgba(244, 249, 245, 0.45);
+}
+
+.subtable-chip {
+  border: 0;
+  border-radius: 3px;
+  padding: 1.5px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.chip-active {
+  background: rgba(52, 211, 153, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.chip-inactive {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(244, 249, 245, 0.4);
+  border: 1px solid transparent;
+}
+
+/* 3. Console Panel */
+.console-panel {
+  flex: 1;
+  min-height: 100px;
+  background: rgba(10, 13, 15, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.console-panel-header {
+  height: 24px;
+  background: #14181b;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.console-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(244, 249, 245, 0.7);
+}
+
+.console-count {
+  font-size: 9.5px;
+  color: rgba(244, 249, 245, 0.4);
+  font-family: var(--font-mono, monospace);
+}
+
+.console-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: rgba(244, 249, 245, 0.5);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.console-mini-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.console-log-scroll {
+  flex: 1;
+  padding: 6px 10px;
+  overflow-y: auto;
+  font-family: var(--font-mono, 'Consolas', monospace);
+  font-size: 10.5px;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.console-log-line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.log-time {
+  color: #64748b;
+  font-size: 9.5px;
+  flex-shrink: 0;
+}
+
+.log-level {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 0 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.level-info {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+.level-warn {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.level-success {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.log-msg {
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   4. Bottom Control Action Bar
+   -------------------------------------------------------------------------- */
+.mower-bottom-bar {
+  height: 44px;
+  background: #111417;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.bottom-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mower-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 160ms ease;
+}
+
+.btn-stop {
+  background: #e06c75;
+  color: #fff;
+}
+.btn-stop:hover {
+  background: #ef5350;
+}
+
+.btn-start {
+  background: #34d399;
+  color: #064e3b;
+}
+.btn-start:hover {
+  background: #10b981;
+}
+
+.btn-split-arrow {
+  margin-left: 2px;
+  opacity: 0.8;
+}
+
+.status-pill {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.pill-idle {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(244, 249, 245, 0.65);
+}
+
+.pill-paused {
+  background: rgba(251, 113, 133, 0.15);
+  color: #fb7185;
+}
+
+.btn-add-task {
+  background: #f3d17c;
+  color: #451a03;
+}
+.btn-add-task:hover {
+  background: #fcd34d;
+}
+
+.btn-feedback {
+  background: #e07a7a;
+  color: #fff;
+}
+.btn-feedback:hover {
+  background: #f87171;
+}
+
+.btn-database {
+  background: #78c2d6;
+  color: #082f49;
+}
+.btn-database:hover {
+  background: #38bdf8;
+}
+
+.bottom-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mower-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: rgba(244, 249, 245, 0.85);
+  cursor: pointer;
+}
+
+.mower-checkbox {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  position: relative;
+}
+
+.mower-checkbox:checked {
+  background: #34d399;
+  border-color: #34d399;
+}
+
+.mower-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4.5px;
+  top: 1.5px;
+  width: 4px;
+  height: 8px;
+  border: solid #064e3b;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.mower-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: rgba(244, 249, 245, 0.85);
+  font-size: 11.5px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.switch-thumb {
+  width: 28px;
+  height: 15px;
+  border-radius: 9999px;
+  background: #334155;
+  position: relative;
+  transition: background 200ms ease;
+}
+
+.switch-thumb::after {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 200ms ease;
+}
+
+.switch-on .switch-thumb {
+  background: #34d399;
+}
+
+.switch-on .switch-thumb::after {
+  transform: translateX(12px);
+}
+
+/* --------------------------------------------------------------------------
+   5. Interactive Subviews (Settings, Shift Planner, Growth, Charts, AI)
+   -------------------------------------------------------------------------- */
+.workspace-subview {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.subview-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #f1f5f9;
+}
+
+.subview-header p {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Settings Grid */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.settings-card {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #34d399;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row-name {
+  font-size: 12px;
+  font-weight: 550;
+  color: #f8fafc;
+}
+
+.row-desc {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.mower-input,
+.mower-select {
+  background: #0f1214;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 11.5px;
+  padding: 4px 8px;
+  outline: none;
+}
+
+.mower-input:focus,
+.mower-select:focus {
+  border-color: #34d399;
+}
+
+/* Rooms Matrix Grid */
+.rooms-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.room-card {
+  background: #171c20;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-badge {
+  font-size: 12px;
+  font-weight: 650;
+  color: #f1f5f9;
+}
+
+.room-eff {
+  font-size: 11px;
+  font-weight: 600;
+  color: #34d399;
+}
+
+.room-ops-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.op-chip {
+  background: #252d33;
+  color: #e2e8f0;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.chip-gold {
+  background: rgba(250, 204, 21, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+}
+
+.chip-boost {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.chip-blue {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.room-meta {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+/* Growth Cards Grid */
+.growth-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.growth-target-card {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.target-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.target-op-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.target-progress-tag {
+  font-size: 11px;
+  color: #34d399;
+}
+
+.progress-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: #252d33;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #34d399;
+  border-radius: 9999px;
+}
+
+.target-materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mat-pill {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.mat-ok {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+}
+
+.mat-needed {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.target-advice {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+/* Metrics Strip & Chart */
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.metric-box {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-title {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #34d399;
+  font-family: var(--font-mono, monospace);
+}
+
+.metric-change {
+  font-size: 9.5px;
+  color: #38bdf8;
+}
+
+.chart-preview-box {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-bars-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 120px;
+  padding-top: 10px;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar-fill {
+  width: 24px;
+  background: linear-gradient(180deg, #34d399 0%, rgba(52, 211, 153, 0.2) 100%);
+  border-radius: 4px 4px 0 0;
+  transition: height 300ms ease;
+}
+
+.bar-date {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.chart-caption {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+/* Skills View */
+.skills-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 80px 80px 140px 1fr;
+  padding: 8px 10px;
+  background: #181d21;
+  border-radius: 6px;
+  font-size: 11.5px;
+  align-items: center;
+}
+
+.head-row {
+  background: #121517;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.skill-op {
+  font-weight: 650;
+  color: #f1f5f9;
+}
+
+.skill-room {
+  color: #38bdf8;
+}
+
+.skill-name {
+  color: #facc15;
+}
+
+.skill-eff {
+  color: #94a3b8;
+}
+
+/* AI View */
+.ai-chat-card {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-message {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #34d399;
+  color: #064e3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ai-bubble {
+  background: #252d33;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #f1f5f9;
+}
+
+.ai-quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-prompt-chip {
+  background: #121517;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(244, 249, 245, 0.85);
+  font-size: 11.5px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.ai-prompt-chip:hover {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   6. Modals
+   -------------------------------------------------------------------------- */
+.mower-inline-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #181d21;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  width: min(100%, 420px);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-head h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: 0;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  padding: 4px 0;
+}
+
+.stat-label {
+  color: #94a3b8;
+}
+
+.stat-val {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.mower-submit-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  background: #34d399;
+  color: #064e3b;
+  border: 0;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mower-submit-btn:hover {
+  background: #10b981;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adaptations
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .pseudo-mower-window {
+    height: auto;
+    min-height: 520px;
+  }
+  .mower-sidebar {
+    width: 54px;
+    padding: 8px 4px;
+  }
+  .sidebar-nav-item span,
+  .sidebar-divider,
+  .secondary-group {
+    display: none;
+  }
+  .sidebar-nav-item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .workspace-lumen-bg {
+    display: none;
+  }
+  .logs-left-column {
+    width: 100%;
+  }
+}
